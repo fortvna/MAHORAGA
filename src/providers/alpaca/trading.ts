@@ -7,6 +7,8 @@ import type {
   MarketDay,
   Order,
   OrderParams,
+  PortfolioHistory,
+  PortfolioHistoryParams,
   Position,
 } from "../types";
 import type { AlpacaClient } from "./client";
@@ -265,6 +267,27 @@ export class AlpacaTradingProvider implements BrokerProvider {
       }
       throw error;
     }
+  }
+
+  async getPortfolioHistory(params?: PortfolioHistoryParams): Promise<PortfolioHistory> {
+    let path = "/v2/account/portfolio/history";
+
+    if (params) {
+      const searchParams = new URLSearchParams();
+      if (params.period) searchParams.set("period", params.period);
+      if (params.timeframe) searchParams.set("timeframe", params.timeframe);
+      if (params.intraday_reporting) searchParams.set("intraday_reporting", params.intraday_reporting);
+      if (params.start) searchParams.set("start", params.start);
+      if (params.end) searchParams.set("end", params.end);
+      if (params.pnl_reset) searchParams.set("pnl_reset", params.pnl_reset);
+
+      const queryString = searchParams.toString();
+      if (queryString) {
+        path += `?${queryString}`;
+      }
+    }
+
+    return this.client.tradingRequest<PortfolioHistory>("GET", path);
   }
 }
 
